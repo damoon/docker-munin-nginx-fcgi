@@ -15,6 +15,7 @@ EOF
 done
 
 # placeholder html to prevent permission error
+if [ ! -e /var/cache/munin/www/index.html ]; then
 cat << EOF > /var/cache/munin/www/index.html
 <html>
 <head>
@@ -26,11 +27,12 @@ Munin has not run yet.  Please try again in a few moments.
 </html>
 EOF
 chown munin:munin /var/cache/munin/www/index.html
+fi
 
 # start cron
-/usr/sbin/cron &
+/usr/sbin/cron
 # start local munin-node
-/usr/sbin/munin-node > /dev/null 2>&1 &
+/usr/sbin/munin-node
 echo "Using the following munin nodes:"
 echo $NODES
 # start apache
