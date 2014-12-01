@@ -7,6 +7,6 @@ RUN (sed -i 's/^\[localhost\.localdomain\]/#\[localhost\.localdomain\]/g' /etc/m
 RUN (mkdir -p /var/run/munin && chown -R munin:munin /var/run/munin)
 COPY run.sh /usr/local/bin/start-munin
 COPY nginx.conf /etc/nginx/sites-available/default
-VOLUME /var/lib/munin
+VOLUME /var/lib/munin /var/log/munin
 EXPOSE 80
 CMD ["start-munin"]
