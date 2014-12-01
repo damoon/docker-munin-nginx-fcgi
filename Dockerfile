@@ -1,19 +1,12 @@
 FROM ubuntu:14.04
-MAINTAINER Arcus "http://arcus.io"
-RUN echo "deb http://archive.ubuntu.com/ubuntu trusty main universe multiverse" > /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y wget
-RUN RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive apt-get install -y cron
-RUN RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive apt-get install -y munin
-RUN RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 libapache2-mod-fcgid libcgi-fast-perl
-RUN (grep ScriptAlias /etc/munin/apache.conf > /etc/apache2/sites-available/default-munin.conf)
-RUN (sed -e 's/^ScriptAlias/#ScriptAlias/' /etc/munin/apache.conf >> /etc/apache2/sites-available/default-munin.conf)
-RUN (sed -i 's/^Alias.*/Alias \/ \/var\/cache\/munin\/www\//g' /etc/apache2/sites-available/default-munin.conf)
-RUN (sed -i 's/^\s*Allow from .*/        Allow from all\n        Require all granted/g' /etc/apache2/sites-available/default-munin.conf)
-RUN (ln -sf /etc/apache2/sites-available/default-munin.conf /etc/apache2/sites-enabled/000-default.conf)
+MAINTAINER David Sauer "http://www.suchgenie.de"
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y munin cron nginx spawn-fcgi libcgi-fast-perl && apt-get clean
+RUN (sed -i 's/^#graph_strategy cron/graph_strategy cgi/g' /etc/munin/munin.conf && sed -i 's/^#html_strategy cron/html_strategy cgi/g' /etc/munin/munin.conf)
+RUN (sed -i 's/^\[localhost\.localdomain\]/#\[localhost\.localdomain\]/g' /etc/munin/munin.conf && sed -i 's/^    address 127.0.0.1/#    address 127.0.0.1/g' /etc/munin/munin.conf && sed -i 's/^    use_node_name yes/#    use_node_name yes/g' /etc/munin/munin.conf)
 RUN (mkdir -p /var/run/munin && chown -R munin:munin /var/run/munin)
-ADD run.sh /usr/local/bin/run
+COPY run.sh /usr/local/bin/start-munin
+COPY nginx.conf /etc/nginx/sites-available/default
 VOLUME /var/lib/munin
-VOLUME /var/log/munin
 EXPOSE 80
-CMD ["/usr/local/bin/run"]
+CMD ["start-munin"]
