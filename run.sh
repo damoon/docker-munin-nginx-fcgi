@@ -1,22 +1,4 @@
 #!/bin/bash
-NODES=${NODES:-}
-
-# generate node list
-for NODE in $NODES
-do
-    NAME=`echo $NODE | cut -d ':' -f1`
-    HOST=`echo $NODE | cut -d ':' -f2`
-    cat << EOF >> /etc/munin/munin.conf
-[$NAME]
-    address $HOST
-    use_node_name yes
-
-EOF
-done
-
-echo "Using the following munin nodes:"
-echo $NODES
-
 touch /var/log/munin/munin-cgi-graph.log
 touch /var/log/munin/munin-cgi-html.log
 chown munin. /var/log/munin/munin-cgi-graph.log
